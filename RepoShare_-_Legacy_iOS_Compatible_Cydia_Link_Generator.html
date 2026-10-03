@@ -1,0 +1,558 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>RepoShare - Cydia Source Link Generator</title>
+    <style type="text/css">
+        /* Reset and Base Styles */
+        * {
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+        }
+
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.4;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+        }
+
+        /* Helper Classes */
+        .clear {
+            clear: both;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ==========================================================================
+           iOS 6 Theme (Skeuomorphic)
+           ========================================================================== */
+        body.theme-ios6 {
+            background-color: #26292e;
+            /* Crosshatch / Linen CSS pattern */
+            background-image: 
+                -webkit-gradient(linear, left top, right bottom, color-stop(0.25, rgba(255, 255, 255, .03)), color-stop(0.25, transparent), color-stop(0.5, transparent), color-stop(0.5, rgba(255, 255, 255, .03)), color-stop(0.75, rgba(255, 255, 255, .03)), color-stop(0.75, transparent)),
+                -webkit-gradient(linear, left bottom, right top, color-stop(0.25, rgba(255, 255, 255, .03)), color-stop(0.25, transparent), color-stop(0.5, transparent), color-stop(0.5, rgba(255, 255, 255, .03)), color-stop(0.75, rgba(255, 255, 255, .03)), color-stop(0.75, transparent));
+            background-size: 10px 10px;
+            color: #ffffff;
+            padding-bottom: 30px;
+        }
+
+        .theme-ios6 .navbar {
+            background-image: -webkit-gradient(linear, left top, left bottom, from(#b0bccc), color-stop(0.5, #687b97), color-stop(0.5, #506585), to(#3d5271));
+            border-bottom: 1px solid #2d3e55;
+            -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+            height: 44px;
+            position: relative;
+            text-align: center;
+        }
+
+        .theme-ios6 .navbar-title {
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: bold;
+            line-height: 44px;
+            text-shadow: 0 -1px 0 rgba(0,0,0,0.8);
+            letter-spacing: -0.5px;
+        }
+
+        .theme-ios6 .theme-toggle-btn {
+            position: absolute;
+            right: 8px;
+            top: 7px;
+            background-image: -webkit-gradient(linear, left top, left bottom, from(#8da0b8), to(#425674));
+            border: 1px solid #233246;
+            -webkit-border-radius: 5px;
+            border-radius: 5px;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 6px 10px;
+            text-shadow: 0 -1px 0 rgba(0,0,0,0.6);
+            -webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
+            cursor: pointer;
+        }
+
+        .theme-ios6 .container {
+            padding: 10px 15px;
+            max-w: 600px;
+            margin: 0 auto;
+        }
+
+        .theme-ios6 .group-header {
+            color: #4c566c;
+            font-size: 17px;
+            font-weight: bold;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+            margin: 15px 10px 6px 10px;
+        }
+
+        .theme-ios6 .group-footer {
+            color: #4c566c;
+            font-size: 13px;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+            margin: 6px 10px 15px 10px;
+            text-align: center;
+        }
+
+        .theme-ios6 .grouped-table {
+            background: #ffffff;
+            border: 1px solid #a9a9a9;
+            -webkit-border-radius: 10px;
+            border-radius: 10px;
+            -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .theme-ios6 .table-row {
+            border-bottom: 1px solid #e0e0e0;
+            padding: 11px 12px;
+            color: #000000;
+            position: relative;
+            background: #ffffff;
+        }
+
+        .theme-ios6 .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .theme-ios6 .text-input {
+            width: 100%;
+            border: none;
+            font-size: 16px;
+            color: #000000;
+            outline: none;
+            background: transparent;
+            font-family: inherit;
+        }
+
+        .theme-ios6 .ios-btn {
+            display: block;
+            width: 100%;
+            padding: 11px 0;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            -webkit-border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-top: 10px;
+        }
+
+        .theme-ios6 .btn-blue {
+            background-image: -webkit-gradient(linear, left top, left bottom, from(#5b92f8), color-stop(0.5, #296df6), color-stop(0.5, #0a54f0), to(#0843c0));
+            border: 1px solid #103b9b;
+            color: #ffffff;
+            text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
+            -webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 1px 2px rgba(0,0,0,0.4);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 1px 2px rgba(0,0,0,0.4);
+        }
+
+        .theme-ios6 .btn-action {
+            background-image: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#e0e0e0));
+            border: 1px solid #a1a1a1;
+            color: #000000;
+            font-size: 15px;
+            font-weight: bold;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+            -webkit-box-shadow: inset 0 1px 0 #ffffff;
+            box-shadow: inset 0 1px 0 #ffffff;
+        }
+
+        .theme-ios6 .btn-green {
+            background-image: -webkit-gradient(linear, left top, left bottom, from(#82db61), color-stop(0.5, #50cb25), color-stop(0.5, #3eb712), to(#2fa107));
+            border: 1px solid #287a07;
+            color: #ffffff;
+            text-shadow: 0 -1px 0 rgba(0,0,0,0.4);
+        }
+
+        .theme-ios6 .btn-purple {
+            background-image: -webkit-gradient(linear, left top, left bottom, from(#b582f8), color-stop(0.5, #8d48f2), color-stop(0.5, #7529ec), to(#5b18c6));
+            border: 1px solid #43109a;
+            color: #ffffff;
+            text-shadow: 0 -1px 0 rgba(0,0,0,0.4);
+        }
+
+        /* ==========================================================================
+           iOS 7 Theme (Flat / Minimalist)
+           ========================================================================== */
+        body.theme-ios7 {
+            background-color: #efeff4;
+            color: #000000;
+            padding-bottom: 30px;
+        }
+
+        .theme-ios7 .navbar {
+            background-color: rgba(247, 247, 247, 0.95);
+            border-bottom: 1px solid #c8c7cc;
+            height: 50px;
+            position: relative;
+            text-align: center;
+        }
+
+        .theme-ios7 .navbar-title {
+            color: #000000;
+            font-size: 17px;
+            font-weight: 600;
+            line-height: 50px;
+        }
+
+        .theme-ios7 .theme-toggle-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background: none;
+            border: none;
+            color: #007aff;
+            font-size: 15px;
+            font-weight: normal;
+            cursor: pointer;
+            padding: 5px 8px;
+        }
+
+        .theme-ios7 .container {
+            padding: 0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .theme-ios7 .group-header {
+            color: #6d6d72;
+            font-size: 13px;
+            text-transform: uppercase;
+            margin: 18px 15px 6px 15px;
+            font-weight: normal;
+        }
+
+        .theme-ios7 .group-footer {
+            color: #6d6d72;
+            font-size: 13px;
+            margin: 6px 15px 18px 15px;
+            text-align: left;
+        }
+
+        .theme-ios7 .grouped-table {
+            background: #ffffff;
+            border-top: 1px solid #c8c7cc;
+            border-bottom: 1px solid #c8c7cc;
+            margin-bottom: 15px;
+        }
+
+        .theme-ios7 .table-row {
+            border-bottom: 1px solid #c8c7cc;
+            padding: 12px 15px;
+            color: #000000;
+            position: relative;
+            background: #ffffff;
+            margin-left: 15px;
+        }
+
+        .theme-ios7 .table-row-full {
+            margin-left: 0;
+        }
+
+        .theme-ios7 .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .theme-ios7 .text-input {
+            width: 100%;
+            border: none;
+            font-size: 16px;
+            color: #000000;
+            outline: none;
+            background: transparent;
+            font-family: inherit;
+        }
+
+        .theme-ios7 .ios-btn {
+            display: block;
+            width: 100%;
+            padding: 12px 0;
+            text-align: center;
+            font-size: 17px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            background: #ffffff;
+            border-top: 1px solid #c8c7cc;
+            border-bottom: 1px solid #c8c7cc;
+            margin-top: -1px;
+        }
+
+        .theme-ios7 .btn-blue {
+            color: #007aff;
+        }
+
+        .theme-ios7 .btn-action {
+            color: #007aff;
+        }
+
+        .theme-ios7 .btn-green {
+            color: #4cd964;
+        }
+
+        .theme-ios7 .btn-purple {
+            color: #5856d6;
+        }
+
+        /* Label Utilities */
+        .row-label {
+            font-weight: bold;
+            display: inline-block;
+            width: 80px;
+            color: #000;
+        }
+
+        .scheme-text {
+            font-family: Courier, monospace;
+            font-size: 12px;
+            color: #555;
+            word-break: break-all;
+            margin-top: 4px;
+        }
+
+        /* Banner Message */
+        .banner {
+            padding: 12px 15px;
+            background: #d9edf7;
+            border-bottom: 1px solid #bce8f1;
+            color: #31708f;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .banner-alert {
+            background: #fcf8e3;
+            border-bottom: 1px solid #faebcc;
+            color: #8a6d3b;
+        }
+    </style>
+</head>
+<body class="theme-ios6" id="appBody">
+
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <span class="navbar-title">RepoShare</span>
+        <button type="button" class="theme-toggle-btn" id="themeBtn" onclick="toggleTheme()">iOS 7 Mode</button>
+    </div>
+
+    <!-- Active Shared Link Banner (If loaded with ?url= parameter) -->
+    <div id="sharedBanner" class="banner hidden">
+        <strong>Repository Shared!</strong><br />
+        <span id="sharedRepoUrlText"></span>
+    </div>
+
+    <div class="container">
+
+        <!-- Input Section -->
+        <div class="group-header">Add Repository</div>
+        <div class="grouped-table">
+            <div class="table-row table-row-full">
+                <input type="url" id="repoInput" class="text-input" placeholder="https://repo.example.com/" value="" />
+            </div>
+        </div>
+
+        <a id="generateBtn" href="javascript:void(0);" onclick="processRepoUrl()" class="ios-btn btn-blue">Generate Direct Links</a>
+
+        <div class="group-footer">
+            Enter any APT or Cydia repository URL to produce direct protocol schemes and share links.
+        </div>
+
+        <!-- Output Results Section -->
+        <div id="outputSection" class="hidden">
+            
+            <div class="group-header">Direct Open Links</div>
+            <div class="grouped-table">
+                <!-- Cydia -->
+                <div class="table-row">
+                    <strong>Cydia</strong>
+                    <div class="scheme-text" id="cydiaSchemeText">cydia://...</div>
+                    <a id="cydiaLinkBtn" href="#" class="ios-btn btn-action" style="margin-top:6px; padding:6px 0; font-size:14px;">Open in Cydia</a>
+                </div>
+                <!-- Sileo -->
+                <div class="table-row">
+                    <strong>Sileo</strong>
+                    <div class="scheme-text" id="sileoSchemeText">sileo://...</div>
+                    <a id="sileoLinkBtn" href="#" class="ios-btn btn-action btn-blue" style="margin-top:6px; padding:6px 0; font-size:14px;">Open in Sileo</a>
+                </div>
+                <!-- Zebra -->
+                <div class="table-row">
+                    <strong>Zebra</strong>
+                    <div class="scheme-text" id="zebraSchemeText">zbra://...</div>
+                    <a id="zebraLinkBtn" href="#" class="ios-btn btn-action btn-green" style="margin-top:6px; padding:6px 0; font-size:14px;">Open in Zebra</a>
+                </div>
+                <!-- Installer 5 -->
+                <div class="table-row">
+                    <strong>Installer 5</strong>
+                    <div class="scheme-text" id="installerSchemeText">installer://...</div>
+                    <a id="installerLinkBtn" href="#" class="ios-btn btn-action btn-purple" style="margin-top:6px; padding:6px 0; font-size:14px;">Open in Installer</a>
+                </div>
+            </div>
+
+            <div class="group-header">Shareable Web Link</div>
+            <div class="grouped-table">
+                <div class="table-row table-row-full">
+                    <input type="text" id="shareableWebUrl" class="text-input" readonly="readonly" value="" onclick="this.select();" />
+                </div>
+            </div>
+
+            <a href="javascript:void(0);" onclick="copyShareLink()" class="ios-btn btn-action" style="margin-bottom:20px;">Copy Shareable Link</a>
+
+        </div>
+
+    </div>
+
+    <script type="text/javascript">
+        /* Standard ES3/ES5 JavaScript strictly compatible with legacy iOS 6/7 Safari */
+
+        var currentTheme = 'ios6';
+
+        // Toggle Theme Engine
+        function toggleTheme() {
+            var body = document.getElementById('appBody');
+            var btn = document.getElementById('themeBtn');
+
+            if (currentTheme === 'ios6') {
+                body.className = 'theme-ios7';
+                btn.innerHTML = 'iOS 6 Mode';
+                currentTheme = 'ios7';
+            } else {
+                body.className = 'theme-ios6';
+                btn.innerHTML = 'iOS 7 Mode';
+                currentTheme = 'ios6';
+            }
+        }
+
+        // Clean and Normalize URL
+        function cleanUrl(url) {
+            if (!url) return '';
+            
+            // Trim whitespace
+            var trimmed = url.replace(/^\s+|\s+$/g, '');
+            if (trimmed === '') return '';
+
+            // Ensure protocol prefix
+            if (trimmed.indexOf('http://') !== 0 && trimmed.indexOf('https://') !== 0) {
+                trimmed = 'https://' + trimmed;
+            }
+
+            // Ensure trailing slash
+            if (trimmed.charAt(trimmed.length - 1) !== '/') {
+                trimmed += '/';
+            }
+
+            return trimmed;
+        }
+
+        // Parse Query Parameters (?url= or ?source=)
+        function getQueryParam(param) {
+            var query = window.location.search.substring(1);
+            var vars = query.split('&');
+            for (var i = 0; i < vars.length; i++) {
+                var pair = vars[i].split('=');
+                if (decodeURIComponent(pair[0]) === param) {
+                    return decodeURIComponent(pair[1]);
+                }
+            }
+            return null;
+        }
+
+        // Process Input and Generate Links
+        function processRepoUrl() {
+            var input = document.getElementById('repoInput');
+            var repoUrl = cleanUrl(input.value);
+
+            if (!repoUrl) {
+                alert('Please enter a valid repository URL.');
+                return;
+            }
+
+            // Update input display with formatted URL
+            input.value = repoUrl;
+
+            // Generate Protocol Schemes
+            var encodedRepo = encodeURIComponent(repoUrl);
+            
+            // Cydia Scheme using Saurik API endpoint
+            var cydiaScheme = 'cydia://url/https://cydia.saurik.com/api/share#?source=' + encodedRepo;
+            var sileoScheme = 'sileo://source/' + encodedRepo;
+            var zebraScheme = 'zbra://sources/add/' + encodedRepo;
+            var installerScheme = 'installer://add/repository=' + encodedRepo;
+
+            // Shareable Web URL
+            var baseWebUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
+            var shareWebUrl = baseWebUrl + '?url=' + encodedRepo;
+
+            // Update DOM Elements
+            document.getElementById('cydiaSchemeText').innerHTML = cydiaScheme;
+            document.getElementById('cydiaLinkBtn').href = cydiaScheme;
+
+            document.getElementById('sileoSchemeText').innerHTML = sileoScheme;
+            document.getElementById('sileoLinkBtn').href = sileoScheme;
+
+            document.getElementById('zebraSchemeText').innerHTML = zebraScheme;
+            document.getElementById('zebraLinkBtn').href = zebraScheme;
+
+            document.getElementById('installerSchemeText').innerHTML = installerScheme;
+            document.getElementById('installerLinkBtn').href = installerScheme;
+
+            document.getElementById('shareableWebUrl').value = shareWebUrl;
+
+            // Unhide Output Section
+            document.getElementById('outputSection').className = '';
+        }
+
+        // Legacy Copy Support
+        function copyShareLink() {
+            var input = document.getElementById('shareableWebUrl');
+            input.focus();
+            input.select();
+            
+            var copied = false;
+            try {
+                copied = document.execCommand('copy');
+            } catch (e) {
+                copied = false;
+            }
+
+            if (copied) {
+                alert('Shareable link copied to clipboard!');
+            } else {
+                alert('URL selected. Please press Copy on your device keyboard menu.');
+            }
+        }
+
+        // Page Initialization
+        window.onload = function() {
+            var urlParam = getQueryParam('url') || getQueryParam('source');
+            if (urlParam) {
+                var cleanParam = cleanUrl(urlParam);
+                document.getElementById('repoInput').value = cleanParam;
+                
+                // Show shared banner
+                var banner = document.getElementById('sharedBanner');
+                document.getElementById('sharedRepoUrlText').innerHTML = cleanParam;
+                banner.className = 'banner';
+
+                // Auto-generate links
+                processRepoUrl();
+            }
+        };
+    </script>
+</body>
+</html>
